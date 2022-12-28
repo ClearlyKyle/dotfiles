@@ -2,10 +2,15 @@
 
 alias ls="ls -hN --color=auto --group-directories-first"
 alias lsa="ls -a"
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
 
 # FLTR (Russian)
 alias fltr='nohup java -jar /home/kyle/Documents/Russian/FLTR.jar &'
 
+# some more ls aliases
+alias config='/usr/bin/git --git-dir=/home/kyle/.cfg/ --work-tree=/home/kyle'
 
 #dotfiles
 # https://www.atlassian.com/git/tutorials/dotfiles
