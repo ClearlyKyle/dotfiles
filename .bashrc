@@ -56,25 +56,51 @@ if [ -n "$force_color_prompt" ]; then
     fi
 fi
 
+get_bash_w() {
+  # Returns the same working directory that the \W bash prompt command
+  echo $(pwd | sed 's@'"$HOME"'@~@')
+}
+
+split_pwd() {
+  # Split pwd into the first element, elipsis (...) and the last subfolder
+  # /usr/local/share/doc --> /usr/.../doc
+  # ~/project/folder/subfolder --> ~/project/../subfolder
+  split=2
+  W=$(get_bash_w)
+  if [ $(echo $W | grep -o '/' | wc -l) -gt $split ]; then
+    echo $W | cut -d'/' -f1-$split | xargs -I{} echo {}"/../${W##*/}"
+  else
+    echo $W
+  fi
+}
+
+COLOUR_PRUPLE='\e[1;95m'
+COLOUR_LPURPLE='\e[0;35m'
+COLOUR_YELLOW='\e[1;93m'
+COLOUR_GREEN='\e[0;93m'
+
+END_COLOUR='\e[0m'
+
 if [ "$color_prompt" = yes ]; then
-    PS1=':\[\033[01;34m\]\w\[\033[00m\]\$ '
-    # old
-    # PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+    # блин это был трудно!
+    PS1='$(case $PWD in
+            $HOME) HPWD="~"; d="";;
+            $HOME/*) HPWD=${PWD/#$HOME/"~"}; d="${HPWD##*/}"; HPWD="${HPWD%/*}/";;
+        esac;printf "${COLOUR_LPURPLE}$HPWD${END_COLOUR}${COLOUR_PRUPLE}$d${END_COLOUR} ${COLOUR_GREEN}➜${END_COLOUR} ")'
 else
-    # this is the old one
-    # PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
-    PS1=':\w\$ '
+    PS1='\w ➜ '
+    
 fi
 unset color_prompt force_color_prompt
 
 # If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
-esac
+#case "$TERM" in
+#xterm*|rxvt*)
+#    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+#    ;;
+#*)
+#    ;;
+#esac
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
@@ -91,22 +117,13 @@ fi
 # colored GCC warnings and errors
 #export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
-# some more ls aliases
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
-if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
+if [ -f ~/.config/shell/aliases ]; then
+    . ~/.config/shell/aliases
 fi
 
 # enable programmable completion features (you don't need to enable
@@ -119,4 +136,7 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
-alias config='/usr/bin/git --git-dir=/home/kyle/.cfg/ --work-tree=/home/kyle'
+
+# Add an "alert" alias for long running commands.  Use like so:
+#   sleep 10; alert
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
