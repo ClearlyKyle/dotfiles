@@ -17,6 +17,8 @@ require("awful.autofocus")
 local wibox = require("wibox")
 -- Theme handling library
 local beautiful = require("beautiful")
+local xresources = require("beautiful.xresources")
+local dpi = xresources.apply_dpi
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
@@ -66,12 +68,13 @@ function run_once(cmd)
 end
   
 run_once("setxkbmap -layout gb,ru")                     -- Multiple keybaord layouts
-run_once("~/.screenlayout/awesomescreenlayout.sh")      -- Display setup, set using "arandr"
+run_once("~/.screenlayout/awesomescreenlayout2.sh")      -- Display setup, set using "arandr"
 -------------------------------------------------------------------------------------------------
 
 -- {{{ Variable definitions
-beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
+--beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 --beautiful.init("~/.config/awesome/bit6theme.lua")
+beautiful.init("~/.config/awesome/mytheme.lua")
 
 -- This is used later as the default terminal and editor to run.
 terminal = "alacritty"
@@ -188,6 +191,12 @@ local function bit_updatelayoutwidget (widget, screen)
     widget.markup = "<span foreground=\"#756bb1\">[</span><span foreground=\"#fcfdfe\">" .. awful.layout.getname(awful.layout.get(screen)) .. "</span><span foreground=\"#756bb1\">]</span>"
 end
 
+-- Create a widget to show number of open windows
+local tb = wibox.widget.textbox()
+local function display_window_count(textbox, screen)
+    textbox:set_markup("we have clicked " .. #screen:get_clients())
+end
+
 awful.screen.connect_for_each_screen(function(s)
     -- Wallpaper
     awful.spawn("hsetroot -solid #0c0d12")
@@ -204,22 +213,63 @@ awful.screen.connect_for_each_screen(function(s)
     awful.tag.attached_connect_signal(s, "property::layout", function () bit_updatelayoutwidget(s.taglayout, s) end)
     awful.tag.attached_connect_signal(s, "property::selected", function () bit_updatelayoutwidget(s.taglayout, s) end)
 
+    awful.tag.attached_connect_signal(s, "property::selected", function(t)
+        display_window_count(tb, s)
+    end)
+
     -- Create a taglist widget (these are the 1, 2, 3, 4)
     s.mytaglist = awful.widget.taglist {
         screen  = s,
         filter  = awful.widget.taglist.filter.all,
-        buttons = taglist_buttons
+        buttons = taglist_buttons,
+        --widget_template = {
+        --    {
+        --        {
+        --            {
+        --                {
+        --                    id     = 'text_role',
+        --                    widget = wibox.widget.textbox,
+        --                },
+        --                margins = dpi(5),
+        --                widget  = wibox.container.margin,
+        --            },
+        --            bg = beautiful.taglist_bg_focus,
+        --            widget = wibox.container.background,
+        --        },
+        --        left  = dpi(10),
+        --        right = dpi(10),
+        --        widget = wibox.container.margin
+        --    },
+        --    id     = 'background_role',
+        --    widget = wibox.container.background,
+        --},
     }
+
+    -- Set the text for the selected tag
+    --s.mytaglist:connect_signal("request::default_style", function(t)
+    --    local theme = beautiful.get()
+    --    local fg_focus = theme.taglist_fg_focus or theme.fg_focus
+    --    local bg_focus = theme.taglist_bg_focus or theme.bg_focus
+    --    local text = "  "
+
+    --    s.mytaglist:set_fg(fg_focus)
+    --    s.mytaglist:set_bg(bg_focus)
+    --    s.mytaglist.text = text .. theme.taglist_squares_sel(t, s)
+    --    --s.mytaglist.text = text .. "soimething"
+    --end)
+
+
 
     -- Create a tasklist widget
     s.mytasklist = awful.widget.tasklist {
         screen  = s,
         filter  = awful.widget.tasklist.filter.currenttags,
-        buttons = tasklist_buttons
+        buttons = tasklist_buttons,
     }
 
     -- Create the wibox
     s.mywibox = awful.wibar({ position = "top", screen = s, height = 16 })
+    
 
     -- Add widgets to the wibox
     s.mywibox:setup {
@@ -229,6 +279,7 @@ awful.screen.connect_for_each_screen(function(s)
             s.mytaglist,
             --mylauncher,       --right click style menu options on the topbar
             --s.mypromptbox,    -- shows a "run" input box, but i will use rofi instead
+            tb,
         },
         s.mytasklist, -- Middle widget
         { -- Right widgets
@@ -534,6 +585,14 @@ client.connect_signal("manage", function (c)
         -- Prevent clients from being unreachable after screen count changes.
         awful.placement.no_offscreen(c)
     end
+
+    local current_screen = c.screen;
+    display_window_count(tb, current_screen);
+end)
+
+client.connect_signal("unmanage", function (c)
+    local current_screen = c.screen;
+    display_window_count(tb, current_screen);
 end)
 
 -- Add a titlebar if titlebars_enabled is set to true in the rules.
@@ -561,6 +620,7 @@ client.connect_signal("request::titlebars", function(c)
             --    align  = "left",
             --    widget = awful.titlebar.widget.titlewidget(c)
             --},
+            mytasklist,
             buttons = buttons,
             layout  = wibox.layout.flex.horizontal
         },
