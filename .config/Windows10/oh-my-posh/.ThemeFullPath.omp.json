@@ -1,0 +1,96 @@
+{
+	"$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+	"final_space": true,
+	"version": 2,
+	"console_title_template": "{{ .Shell }} in {{ .Folder }}",
+	"blocks": [
+		{
+			"type": "prompt",
+			"alignment": "left",
+			"segments": [
+				{
+					"type": "path",
+					"style": "powerline",
+					"foreground": "#ffafd2",
+					"properties": {
+						"style": "agnoster_full",
+						"home_icon": "home"
+					},
+					"template": "{{ .Path }} "
+				}
+			]
+		},
+		{
+			"type": "prompt",
+			"alignment": "left",
+			"newline": true,
+			"segments": [
+				{
+					"foreground": "#D0666F",
+					"properties": {
+						"branch_icon": "",
+						"fetch_status": false
+					},
+					"style": "plain",
+					"template": "<#5FAAE8>git(</>{{ .HEAD }}<#5FAAE8>)</> ",
+					"type": "git"
+				},
+				{
+					"type": "text",
+					"style": "plain",
+					"foreground": "#98C379",
+					"template": "\u279c"
+				}
+			]
+		},
+		{
+			"type": "rprompt",
+			"segments": [
+				{
+					"type": "exit",
+					"style": "plain",
+					"foreground": "#BF616A",
+					"template": "\u2717 "
+				},
+				{
+					"type": "shell",
+					"style": "powerline",
+					"powerline_symbol": "\uE0B0",
+					"foreground": "p:white",
+					"background": "transparent",
+					"template": "<p:blue><b>{{ .Name }}</b></> ",
+					"properties": {
+						"mapped_shell_names": {
+							"pwsh": "PS"
+						}
+					}
+				},
+				{
+					"type": "time",
+					"style": "plain",
+					"foreground": "p:white",
+					"background": "transparent",
+					"template": "at <p:blue><b>{{ .CurrentDate | date \"15:04\" }}</b></>"
+				},
+				{
+					"type": "executiontime",
+					"style": "plain",
+					"properties": {
+						"always_enabled": true,
+						"style": "round"
+					},
+					"template": " {{ .FormattedMs }}"
+				}
+			]
+		}
+	],
+	"palette": {
+		"black": "#262B44",
+		"blue": "#4B95E9",
+		"green": "#59C9A5",
+		"orange": "#F07623",
+		"red": "#D81E5B",
+		"white": "#E0DEF4",
+		"yellow": "#F3AE35"
+	}
+}
