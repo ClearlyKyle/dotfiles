@@ -1,0 +1,33 @@
+general {
+	colors = true
+	color_good = "#a3be8c"
+	color_bad  = "#bf616a"
+	color_degraded = "#ebcb8b"
+	interval = 1
+	separator = "|"
+  }
+  
+  order += "cpu_usage"
+  order += "battery 1"
+  order += "memory"
+
+  cpu_usage {
+	format = "CPU %usage "
+  }
+
+  battery 1 {
+	//format = "%status %percentage %remaining %emptytime"
+	format = " %status %percentage %remaining "
+	format_down = "NO BAT"
+	status_chr = "CHR"
+	status_bat = "BAT"
+	status_unk = "UNK"
+	status_full = "FULL"
+	path = "/sys/class/power_supply/BAT%d/uevent"
+	low_threshold = 10
+  }
+
+  memory {
+	memory_used_method = classical
+	format=" MEM %percentage_used"
+  }
