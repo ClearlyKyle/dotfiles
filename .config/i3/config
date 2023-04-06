@@ -13,29 +13,36 @@
 # mod4 - Window Key
 set $mod Mod1
 
-# Font for window titRhhhhhhhhhhhhhhhles. Will also be used by the bar unless a different font
+# Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
-font pango:Roboto Mono for Powerline 11
+#font pango:Roboto Mono for Powerline 11
+font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
+#font pango:Arial 10
+font pango:JetBrainsMono 9
 
+# Remove name from top of windows
 for_window [class="^.*"] border pixel 1
 title_align center
 
-# This font is widely installed, provides lots of unicode glyphs, right-to-left
-# text rendering and scalability on retina/hidpi displays (thanks to pango).
-#font JetBrainsMono:monospace 8
-
-# The combination of xss-lock, nm-applet and pactl is a popular choice, so
-# they are included here as an example. Modify as you see fit.
 
 # xss-lock grabs a logind suspend inhibit lock and will use i3lock to lock the
 # screen before suspend. Use loginctl lock-session to lock your screen.
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 
+# Allows chrome to save passwords
+# --password-store=gnome # add this to chrome.desktop launch options
+exec --no-startup-id /usr/bin/gnome-keyring-daemon --start --components=secrets
+
 # NetworkManager is the most popular way to manage wireless networks on Linux,
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 exec --no-startup-id nm-applet
 
-# Use pactl to adjust volume in PulseAudio.
+# Multiple Keyboards (this seems to never work)
+exec_always -no-startup-id setxkbmap -layout gb
+bindsym $mod+Ctrl+Shift+F11 exec setxkbmap -layout gb
+bindsym $mod+Ctrl+Shift+F12 exec setxkbmap -layout ru
+
+# Use pactl to adjust volume in PulseAudio
 set $refresh_i3status killall -SIGUSR1 i3status
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
 bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
@@ -47,7 +54,7 @@ floating_modifier $mod
 
 # move tiling windows via drag & drop by left-clicking into the title bar,
 # or left-clicking anywhere into the window while holding the floating modifier.
-#tiling_drag modifier titlebar
+# tiling_drag modifier titlebar
 
 # start a terminal
 bindsym $mod+Return exec i3-sensible-terminal
@@ -55,13 +62,9 @@ bindsym $mod+Return exec i3-sensible-terminal
 # kill focused window
 bindsym $mod+Shift+q kill
 
-# start dmenu (a program launcher)
-#bindsym $mod+d exec
+# rofi launcher
 bindsym $mod+d exec --no-startup-id rofi -show drun
-# There also is the (new) i3-dmenu-desktop which only displays applications
-# shipping a .desktop file. It is a wrapper around dmenu, so you need that
-# installed.
-# bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
+bindsym $mod+Tab exec --no-startup-id rofi -show window
 
 # change focus
 bindsym $mod+j focus left
@@ -115,14 +118,12 @@ bindsym $mod+space focus mode_toggle
 
 # Multiple Monitors (created with : arandr)
 exec --no-startup-id ~/.screenlayout/i3_window_layout_2.sh
+exec --no-startup-id ~/.screenlayout/i3_window_layout_1.sh
 
 exec --no-startup-id /usr/libexec/gsd-xsettings
 
-set $RightMonitor DP-2-8
-set $LeftMonitor DP-2-9
-
-#set $RightMonitor primary
-#set $LeftMonitor secondary
+set $RightMonitor DP-1-8 DP-2-8 primary
+set $LeftMonitor DP-1-9 DP-2-9 secondary
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
@@ -205,20 +206,22 @@ bindsym $mod+r mode "resize"
 # finds out, if available)
 bar {
     #status_command i3status
-    status_command /home/kyle/.config/i3/scripts/window_name.sh
+    status_command i3status -c /home/kyle/.config/i3status/i3status_basic.conf
+
+    # this shows icons to the left of the date, such as wifi settings
+    tray_output none
+
     position top
     workspace_buttons yes
-    strip_workspace_numbers no
     colors {
-        background #282a36
-        statusline #ffffff
-        separator #666666
-
-        focused_workspace  #4c7899 #285577 #ffffff
-        active_workspace   #333333 #5f676a #ffffff
-        inactive_workspace #333333 #222222 #888888
-        urgent_workspace   #2f343a #900000 #ffffff
-        binding_mode       #2f343a #900000 #ffffff
+            background  #404552
+            statusline  #fbfbfb
+            separator   #e6e6e6
+            # class             border  backgr. text
+            focused_workspace   #3685e2 #3685e2 #FFFFFF
+            active_workspace    #404552 #404552 #FFFFFF
+            inactive_workspace  #404552 #404552 #FFFFFF
+            urgent_workspace    #404552 #404552 #FFFFFF
     }
 }
 
@@ -237,8 +240,5 @@ client.unfocused           #2e3440 #282a36 #6272a4 #2e3440   #2e3440
 client.urgent              #e3829d #e3829d #f8f8f2 #f8f8f2   #e3829d
 client.placeholder         #282a36 #44475a #f8f8f2 #282a36   #44475a
 client.background          #282a36
-
-# Multiple Keyboards
-exec "setxkbmap -layout gb,ru"
 
  
